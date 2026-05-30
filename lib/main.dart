@@ -14,182 +14,291 @@ class DbNeighborsApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6366F1)),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const MeasureScreen(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class MeasureScreen extends StatefulWidget {
+  const MeasureScreen({super.key});
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<MeasureScreen> createState() => _MeasureScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _MeasureScreenState extends State<MeasureScreen>
+    with SingleTickerProviderStateMixin {
   int _tab = 0;
   double _db = 0;
   bool _measuring = false;
+  late AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(vsync: this, duration: const Duration(seconds: 1))
+      ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    _measuring = false;
+    super.dispose();
+  }
+
+  void _toggleMeasure() {
+    setState(() => _measuring = !_measuring);
+    if (_measuring) _simulateMeasure();
+  }
+
+  void _simulateMeasure() async {
+    while (_measuring && mounted) {
+      await Future.delayed(const Duration(milliseconds: 150));
+      if (!mounted) break;
+      setState(() {
+        _db = 25 + (DateTime.now().millisecond % 55).toDouble() +
+            (DateTime.now().second % 20).toDouble();
+      });
+    }
+  }
+
+  Color get _dbColor {
+    if (_db < 45) return const Color(0xFF22C55E);
+    if (_db < 65) return const Color(0xFFF59E0B);
+    return const Color(0xFFEF4444);
+  }
+
+  String get _dbLabel {
+    if (_db < 45) return 'שקט';
+    if (_db < 65) return 'רגיל';
+    return 'רועש';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('dB Neighbors'),
+        centerTitle: true,
         backgroundColor: const Color(0xFF1A1A2E),
         foregroundColor: Colors.white,
       ),
       body: IndexedStack(
         index: _tab,
-        children: [
-          _MeasureTab(db: _db, measuring: _measuring, onToggle: _toggleMeasure),
-          const _NeighborsTab(),
-          const _HistoryTab(),
-        ],
+        children: [_buildMeasure(), _buildNeighbors(), _buildHistory()],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         onDestinationSelected: (i) => setState(() => _tab = i),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.graphic_eq), label: 'מדידה'),
-          NavigationDestination(icon: Icon(Icons.people), label: 'שכנים'),
+          NavigationDestination(icon: Icon(Icons.people_outline), label: 'שכנים'),
           NavigationDestination(icon: Icon(Icons.history), label: 'היסטוריה'),
         ],
       ),
     );
   }
 
-  void _toggleMeasure() {
-    setState(() {
-      _measuring = !_measuring;
-      if (_measuring) {
-        Future.periodic(const Duration(milliseconds: 200), (t) {
-          if (!_measuring) return;
-          setState(() {
-            _db = 30 + (t % 40) * 1.0 + (t % 7) * 2.0;
-          });
-        });
-      }
-    });
-  }
-}
-
-class _MeasureTab extends StatelessWidget {
-  final double db;
-  final bool measuring;
-  final VoidCallback onToggle;
-  const _MeasureTab({required this.db, required this.measuring, required this.onToggle});
-
-  Color get _color {
-    if (db < 45) return Colors.green;
-    if (db < 65) return Colors.amber;
-    return Colors.red;
-  }
-
-  String get _label {
-    if (db < 45) return 'שקט';
-    if (db < 65) return 'רגיל';
-    return 'רועש';
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildMeasure() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            '${db.toStringAsFixed(0)} dB',
-            style: TextStyle(fontSize: 72, fontWeight: FontWeight.bold, color: _color),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              if (_measuring)
+                AnimatedBuilder(
+                  animation: _pulse,
+                  builder: (_, __) => Container(
+                    width: 160 + _pulse.value * 20,
+                    height: 160 + _pulse.value * 20,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _dbColor.withOpacity(0.15 * (1 - _pulse.value)),
+                    ),
+                  ),
+                ),
+              Container(
+                width: 160,
+                height: 160,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _dbColor.withOpacity(0.1),
+                  border: Border.all(color: _dbColor, width: 2),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _measuring ? _db.toStringAsFixed(0) : '--',
+                      style: TextStyle(
+                        fontSize: 56,
+                        fontWeight: FontWeight.bold,
+                        color: _dbColor,
+                      ),
+                    ),
+                    Text('dB',
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: _dbColor.withOpacity(0.7),
+                            fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: _color.withOpacity(0.15),
+              color: _dbColor.withOpacity(0.12),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(_label, style: TextStyle(color: _color, fontWeight: FontWeight.w500)),
+            child: Text(_measuring ? _dbLabel : 'לחץ למדידה',
+                style: TextStyle(color: _dbColor, fontWeight: FontWeight.w500)),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 36),
           GestureDetector(
-            onTap: onToggle,
-            child: Container(
-              width: 80, height: 80,
+            onTap: _toggleMeasure,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 72, height: 72,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: measuring ? Colors.red.withOpacity(0.15) : Colors.indigo.withOpacity(0.15),
-                border: Border.all(color: measuring ? Colors.red : Colors.indigo, width: 2),
+                color: (_measuring ? Colors.red : const Color(0xFF6366F1)).withOpacity(0.12),
+                border: Border.all(
+                  color: _measuring ? Colors.red : const Color(0xFF6366F1),
+                  width: 2,
+                ),
               ),
               child: Icon(
-                measuring ? Icons.stop : Icons.mic,
-                size: 36,
-                color: measuring ? Colors.red : Colors.indigo,
+                _measuring ? Icons.stop_rounded : Icons.mic_rounded,
+                size: 32,
+                color: _measuring ? Colors.red : const Color(0xFF6366F1),
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Text(measuring ? 'מודד... לחץ לעצירה' : 'לחץ למדידה',
-              style: const TextStyle(color: Colors.grey)),
+          const SizedBox(height: 32),
+          if (_measuring) _buildMiniCards(),
         ],
       ),
     );
   }
-}
 
-class _NeighborsTab extends StatelessWidget {
-  const _NeighborsTab();
+  Widget _buildMiniCards() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _MiniCard(label: 'BPM', value: '${72 + (_db / 5).round()}', color: Colors.pink),
+        const SizedBox(width: 12),
+        _MiniCard(label: 'דיבור', value: '4.2 hps', color: Colors.teal),
+      ],
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildNeighbors() {
     final neighbors = [
-      {'name': 'משפחת כהן', 'pos': 'תקרה', 'db': 61},
-      {'name': 'אלי לוי', 'pos': 'קיר ימין', 'db': 34},
-      {'name': 'שרה מזרחי', 'pos': 'רצפה', 'db': 58},
+      _Neighbor('משפחת כהן', 'תקרה', 61),
+      _Neighbor('אלי לוי', 'קיר ימין', 34),
+      _Neighbor('שרה מזרחי', 'רצפה מתחת', 58),
     ];
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: neighbors.map((n) {
-        final db = n['db'] as int;
-        final color = db < 45 ? Colors.green : (db < 65 ? Colors.amber : Colors.red);
-        return Card(
-          margin: const EdgeInsets.only(bottom: 10),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.indigo.withOpacity(0.15),
-              child: Text((n['name'] as String)[0],
-                  style: const TextStyle(color: Colors.indigo)),
-            ),
-            title: Text(n['name'] as String),
-            subtitle: Text(n['pos'] as String),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(20),
+      children: [
+        for (final n in neighbors)
+          Card(
+            margin: const EdgeInsets.only(bottom: 10),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: const Color(0xFF6366F1).withOpacity(0.15),
+                child: Text(n.name[0],
+                    style: const TextStyle(
+                        color: Color(0xFF6366F1), fontWeight: FontWeight.bold)),
               ),
-              child: Text('$db dB',
-                  style: TextStyle(color: color, fontWeight: FontWeight.w500)),
+              title: Text(n.name),
+              subtitle: Text(n.pos),
+              trailing: _DbBadge(n.db),
+              onTap: () {},
             ),
           ),
-        );
-      }).toList(),
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          onPressed: () {},
+          icon: const Icon(Icons.add),
+          label: const Text('הוסף שכן'),
+          style: FilledButton.styleFrom(backgroundColor: const Color(0xFF6366F1)),
+        ),
+      ],
     );
   }
-}
 
-class _HistoryTab extends StatelessWidget {
-  const _HistoryTab();
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildHistory() {
     return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history, size: 64, color: Colors.grey),
+          Icon(Icons.bar_chart, size: 72, color: Color(0xFF6366F1)),
           SizedBox(height: 16),
-          Text('היסטוריית מדידות', style: TextStyle(fontSize: 18, color: Colors.grey)),
+          Text('היסטוריית מדידות', style: TextStyle(fontSize: 18)),
+          SizedBox(height: 8),
+          Text('תיעוד רמות רעש לאורך זמן',
+              style: TextStyle(color: Colors.grey)),
         ],
       ),
+    );
+  }
+}
+
+class _MiniCard extends StatelessWidget {
+  final String label, value;
+  final Color color;
+  const _MiniCard({required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(children: [
+        Text(label, style: TextStyle(fontSize: 11, color: color.withOpacity(0.7))),
+        const SizedBox(height: 2),
+        Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+      ]),
+    );
+  }
+}
+
+class _Neighbor {
+  final String name, pos;
+  final int db;
+  const _Neighbor(this.name, this.pos, this.db);
+}
+
+class _DbBadge extends StatelessWidget {
+  final int db;
+  const _DbBadge(this.db);
+
+  Color get color {
+    if (db < 45) return const Color(0xFF22C55E);
+    if (db < 65) return const Color(0xFFF59E0B);
+    return const Color(0xFFEF4444);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text('$db dB',
+          style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13)),
     );
   }
 }
