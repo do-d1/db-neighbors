@@ -31,8 +31,7 @@ jobs:
         run: flutter create --org com.dbneighbors --project-name app /tmp/dbapp
 
       - name: Inject our code
-        run: |
-          cp lib/main.dart /tmp/dbapp/lib/main.dart
+        run: cp lib/main.dart /tmp/dbapp/lib/main.dart
 
       - name: Build APK
         run: |
