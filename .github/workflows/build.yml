@@ -27,28 +27,22 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Create fresh Flutter project
+      - name: Flutter version check
         run: |
-          cd /tmp
-          flutter create --org com.dbneighbors --project-name app fresh_app
-          echo "Created fresh project"
-          ls /tmp/fresh_app/
+          flutter --version
+          java -version
+          echo "FLUTTER_ROOT=$FLUTTER_ROOT"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
 
-      - name: Replace lib with our code
+      - name: Create and build minimal Flutter app
         run: |
-          cp -f lib/main.dart /tmp/fresh_app/lib/main.dart
-          echo "Replaced main.dart"
-
-      - name: Build APK
-        run: |
-          cd /tmp/fresh_app
-          flutter pub get
-          flutter build apk --debug
-          ls -lh build/app/outputs/flutter-apk/
+          flutter create --org com.test --project-name myapp /tmp/myapp
+          cd /tmp/myapp
+          flutter build apk --debug 2>&1 | tail -30
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: db-neighbors-debug
-          path: /tmp/fresh_app/build/app/outputs/flutter-apk/app-debug.apk
+          path: /tmp/myapp/build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 30
