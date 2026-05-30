@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-android:
     name: Build Android APK
@@ -24,8 +27,9 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Create local.properties
+      - name: Setup Android SDK
         run: |
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
           echo "sdk.dir=$ANDROID_SDK_ROOT" >> android/local.properties
 
@@ -33,29 +37,14 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --debug --no-tree-shake-icons
-        continue-on-error: true
-
-      - name: Find APK
         run: |
-          echo "Searching for APK files..."
-          find . -name "*.apk" -not -path "*/cache/*" 2>/dev/null
-          echo "Build output structure:"
-          ls -la build/app/outputs/ 2>/dev/null || echo "No build/app/outputs"
-          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "No flutter-apk dir"
+          flutter build apk --debug --no-tree-shake-icons 2>&1
+          echo "Exit code: $?"
+          find . -name "*.apk" 2>/dev/null | grep -v ".pub-cache" || echo "No APK found"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: db-neighbors-debug
           path: build/app/outputs/flutter-apk/app-debug.apk
-          if-no-files-found: warn
-          retention-days: 30
-
-      - name: Upload any APK found
-        uses: actions/upload-artifact@v4
-        with:
-          name: db-neighbors-any-apk
-          path: "**/*.apk"
-          if-no-files-found: warn
           retention-days: 30
