@@ -44,8 +44,8 @@ jobs:
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0
-          name: dB Neighbors v1.0
+          tag_name: v1.1
+          name: dB Neighbors v1.1
           files: /tmp/dbapp/build/app/outputs/flutter-apk/app-debug.apk
           body: |
             ## dB Neighbors v1.0
