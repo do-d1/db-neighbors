@@ -12,6 +12,8 @@ jobs:
   build-android:
     name: Build Android APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -39,9 +41,23 @@ jobs:
           flutter pub get
           flutter build apk --debug --no-tree-shake-icons
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: dB-Neighbors-v1.0-debug
-          path: /tmp/dbapp/build/app/outputs/flutter-apk/app-debug.apk
-          retention-days: 30
+          tag_name: v1.0
+          name: dB Neighbors v1.0
+          files: /tmp/dbapp/build/app/outputs/flutter-apk/app-debug.apk
+          body: |
+            ## dB Neighbors v1.0
+            
+            ### התקנה על אנדרואיד
+            1. לחץ על `app-debug.apk` להורדה
+            2. פתח את הקובץ בטלפון
+            3. אשר התקנה ממקורות לא ידועים
+            
+            ### פיצ'רים
+            - מדידת רמת רעש (dB)
+            - מדידת BPM מוזיקה
+            - מדידת מהירות דיבור (WPM)
+            - מפת דירה + LiDAR
+            - רשת חברתית שכנים
