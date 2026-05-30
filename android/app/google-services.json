@@ -1,0 +1,17 @@
+{
+  "project_info": {
+    "project_number": "123456789",
+    "project_id": "db-neighbors-dev",
+    "storage_bucket": "db-neighbors-dev.appspot.com"
+  },
+  "client": [{
+    "client_info": {
+      "mobilesdk_app_id": "1:123456789:android:abcdef123456",
+      "android_client_info": {
+        "package_name": "com.example.db_neighbors"
+      }
+    },
+    "api_key": [{"current_key": "placeholder"}],
+    "services": {}
+  }]
+}
