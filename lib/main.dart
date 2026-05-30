@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'firebase_options.dart';
 import 'screens/home_screen.dart';
 import 'screens/auth_screen.dart';
 import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const DbNeighborsApp());
 }
 
@@ -41,10 +42,8 @@ class AppTheme {
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFF1A1A2E),
-      brightness: Brightness.light,
     ),
     textTheme: GoogleFonts.interTextTheme(),
-    scaffoldBackgroundColor: const Color(0xFFF8F8F8),
   );
 
   static final dark = ThemeData(
@@ -70,7 +69,8 @@ class SplashScreen extends StatelessWidget {
           children: [
             Icon(Icons.graphic_eq, size: 64, color: Color(0xFF4ADE80)),
             SizedBox(height: 16),
-            Text('dB Neighbors', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600)),
+            Text('dB Neighbors',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600)),
           ],
         ),
       ),

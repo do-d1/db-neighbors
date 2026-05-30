@@ -1,5 +1,5 @@
 name: db_neighbors
-description: Measure dB, BPM, speech speed — connect with neighbors
+description: Noise measurement social app for neighbors
 publish_to: none
 version: 1.0.0+1
 
@@ -10,31 +10,30 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Audio & measurement
+  # Audio
   noise_meter: ^6.0.0
   permission_handler: ^11.3.0
-  audio_session: ^0.1.21
 
   # Firebase
-  firebase_core: ^3.3.0
-  firebase_auth: ^5.1.0
-  cloud_firestore: ^5.2.0
-  firebase_messaging: ^15.0.3
+  firebase_core: ^3.4.0
+  firebase_auth: ^5.2.0
+  cloud_firestore: ^5.4.0
+  firebase_messaging: ^15.1.0
 
-  # Social / networking
-  geolocator: ^13.0.0
+  # Location & QR
+  geolocator: ^13.0.1
   qr_flutter: ^4.1.0
   mobile_scanner: ^5.2.3
 
   # UI
-  fl_chart: ^0.68.0
+  fl_chart: ^0.69.0
   flutter_animate: ^4.5.0
   google_fonts: ^6.2.1
 
-  # Utilities
-  shared_preferences: ^2.3.0
+  # Utils
+  shared_preferences: ^2.3.2
   intl: ^0.19.0
-  uuid: ^4.4.0
+  uuid: ^4.5.0
 
 dev_dependencies:
   flutter_test:
