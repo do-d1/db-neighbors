@@ -27,20 +27,30 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Setup Android SDK
+      - name: Create fresh Flutter project
         run: |
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
-          echo "sdk.dir=$ANDROID_SDK_ROOT" >> android/local.properties
+          cd /tmp
+          flutter create --org com.example --project-name dbneighbors fresh_app
+          echo "Fresh project created"
 
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build APK
+      - name: Copy our lib files into fresh project
         run: |
-          flutter build apk --debug --no-tree-shake-icons 2>&1
-          echo "Exit code: $?"
-          find . -name "*.apk" 2>/dev/null | grep -v ".pub-cache" || echo "No APK found"
+          cp -r lib/. /tmp/fresh_app/lib/
+          cp pubspec.yaml /tmp/fresh_app/pubspec.yaml
+
+      - name: Build APK from fresh project
+        run: |
+          cd /tmp/fresh_app
+          flutter pub get
+          flutter build apk --debug --no-tree-shake-icons
+          echo "Build done"
+          ls -la build/app/outputs/flutter-apk/ || echo "No output"
+
+      - name: Copy APK back
+        run: |
+          mkdir -p build/app/outputs/flutter-apk/
+          cp /tmp/fresh_app/build/app/outputs/flutter-apk/app-debug.apk \
+             build/app/outputs/flutter-apk/ 2>/dev/null || echo "Copy failed"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
