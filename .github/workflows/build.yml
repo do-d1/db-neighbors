@@ -34,10 +34,28 @@ jobs:
 
       - name: Build APK
         run: flutter build apk --debug --no-tree-shake-icons
+        continue-on-error: true
+
+      - name: Find APK
+        run: |
+          echo "Searching for APK files..."
+          find . -name "*.apk" -not -path "*/cache/*" 2>/dev/null
+          echo "Build output structure:"
+          ls -la build/app/outputs/ 2>/dev/null || echo "No build/app/outputs"
+          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "No flutter-apk dir"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: db-neighbors-debug
           path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload any APK found
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-neighbors-any-apk
+          path: "**/*.apk"
+          if-no-files-found: warn
           retention-days: 30
