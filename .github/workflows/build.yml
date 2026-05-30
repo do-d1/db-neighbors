@@ -24,25 +24,20 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Flutter doctor
-        run: flutter doctor -v
-
       - name: Create local.properties
         run: |
           echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
           echo "sdk.dir=$ANDROID_SDK_ROOT" >> android/local.properties
-          cat android/local.properties
 
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build APK verbose
-        run: flutter build apk --debug --no-tree-shake-icons --verbose
-        continue-on-error: true
+      - name: Build APK
+        run: flutter build apk --debug --no-tree-shake-icons
 
-      - name: Check output
-        run: |
-          echo "=== APK output files ==="
-          find build/ -name "*.apk" 2>/dev/null || echo "No APK found"
-          echo "=== build directory ==="
-          ls -la build/ 2>/dev/null || echo "No build dir"
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-neighbors-debug
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 30
