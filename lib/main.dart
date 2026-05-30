@@ -909,137 +909,39 @@ class _MethodDetail extends StatelessWidget {
   const _MethodDetail({required this.method});
 
   void _handleMethodAction(BuildContext context, String method) {
+    String title, body;
+    Color color;
     switch (method) {
       case 'upload':
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Row(children: [
-              Icon(Icons.upload_file_outlined, color: Color(0xFF6366F1)),
-              SizedBox(width: 8),
-              Text('העלאת תשריט'),
-            ]),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('בגרסה הבאה תוכל להעלות:'),
-                SizedBox(height: 8),
-                _DialogItem(icon: Icons.picture_as_pdf, text: 'קובץ PDF של תוכנית הדירה'),
-                _DialogItem(icon: Icons.image_outlined, text: 'תמונה של התשריט'),
-                _DialogItem(icon: Icons.camera_alt_outlined, text: 'צלם את התשריט ישירות'),
-                SizedBox(height: 12),
-                Text('Claude Vision יזהה חדרים,
-קירות ומידות אוטומטית.',
-                    style: TextStyle(fontSize: 12, color: Colors.grey)),
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('סגור')),
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                style: FilledButton.styleFrom(backgroundColor: Color(0xFF6366F1)),
-                child: const Text('בקרוב...'),
-              ),
-            ],
-          ),
-        );
+        title = 'העלאת תשריט'; color = const Color(0xFF6366F1);
+        body = 'בגרסה הבאה תוכל להעלות PDF או תמונה של תוכנית הדירה.\nClaude Vision יזהה חדרים, קירות ומידות אוטומטית.';
         break;
       case 'photo':
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Row(children: [
-              Icon(Icons.camera_alt_outlined, color: Color(0xFF22C55E)),
-              SizedBox(width: 8),
-              Text('צילום חדרים'),
-            ]),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('הוראות צילום:'),
-                SizedBox(height: 8),
-                _DialogItem(icon: Icons.looks_one_outlined, text: 'עמוד בפינה ושמאל → ימין'),
-                _DialogItem(icon: Icons.looks_two_outlined, text: 'צלם 4 תמונות — פינה לפינה'),
-                _DialogItem(icon: Icons.looks_3_outlined, text: 'כסה את כל הקירות'),
-                _DialogItem(icon: Icons.looks_4_outlined, text: 'AI יזהה רהיטים אוטומטית'),
-                SizedBox(height: 12),
-                Text('זמין בגרסה הבאה עם
-חיבור למצלמה ו-AI.',
-                    style: TextStyle(fontSize: 12, color: Colors.grey)),
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('סגור')),
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                style: FilledButton.styleFrom(backgroundColor: Color(0xFF22C55E)),
-                child: const Text('בקרוב...'),
-              ),
-            ],
-          ),
-        );
+        title = 'צילום חדרים'; color = const Color(0xFF22C55E);
+        body = 'צלם 4 תמונות מהפינות.\nAI יזהה: ספה, מיטה, שטיח, שולחן\nוימקם אוטומטית על המפה.';
         break;
       case 'lidar_ios':
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Row(children: [
-              Icon(Icons.threed_rotation_outlined, color: Color(0xFF0EA5E9)),
-              SizedBox(width: 8),
-              Text('LiDAR — iPhone'),
-            ]),
-            content: const Text(
-                'דורש iPhone 12 Pro ומעלה.
-
-בגרסה הבאה: חיבור ל-ARKit
-לסריקת חדר תוך 30 שניות.'),
-            actions: [
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                style: FilledButton.styleFrom(backgroundColor: Color(0xFF0EA5E9)),
-                child: const Text('הבנתי'),
-              ),
-            ],
-          ),
-        );
+        title = 'LiDAR — iPhone 12 Pro+'; color = const Color(0xFF0EA5E9);
+        body = 'דורש iPhone 12 Pro ומעלה.\nבגרסה הבאה: חיבור ל-ARKit לסריקת חדר תוך 30 שניות.\nדיוק ±1 ס"מ.';
         break;
-      case 'lidar_ext':
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Row(children: [
-              Icon(Icons.sensors_outlined, color: Color(0xFFF59E0B)),
-              SizedBox(width: 8),
-              Text('LiDAR חיצוני'),
-            ]),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('התקנים נתמכים:'),
-                SizedBox(height: 8),
-                _DialogItem(icon: Icons.usb, text: 'Structure Sensor — USB-C'),
-                _DialogItem(icon: Icons.usb, text: 'Intel RealSense D435 — USB-C'),
-                _DialogItem(icon: Icons.bluetooth, text: 'Matterport Pro3 — WiFi'),
-                SizedBox(height: 12),
-                Text('חיבור דרך Bluetooth / USB-C
-בגרסה הבאה.',
-                    style: TextStyle(fontSize: 12, color: Colors.grey)),
-              ],
-            ),
-            actions: [
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                style: FilledButton.styleFrom(backgroundColor: Color(0xFFF59E0B)),
-                child: const Text('הבנתי'),
-              ),
-            ],
-          ),
-        );
-        break;
+      default:
+        title = 'LiDAR חיצוני'; color = const Color(0xFFF59E0B);
+        body = 'נתמך:\n• Structure Sensor USB-C\n• Intel RealSense D435 USB-C\n• Matterport Pro3 WiFi';
     }
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title, style: TextStyle(color: color)),
+        content: Text(body),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            style: FilledButton.styleFrom(backgroundColor: color),
+            child: const Text('הבנתי'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
