@@ -1,0 +1,49 @@
+name: db_neighbors
+description: Measure dB, BPM, speech speed — connect with neighbors
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Audio & measurement
+  noise_meter: ^6.0.0
+  permission_handler: ^11.0.0
+  audio_session: ^0.1.18
+
+  # Firebase
+  firebase_core: ^2.24.0
+  firebase_auth: ^4.15.0
+  cloud_firestore: ^4.13.0
+  firebase_messaging: ^14.7.9
+
+  # Social / networking
+  geolocator: ^10.1.0
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^3.5.5
+
+  # UI
+  fl_chart: ^0.65.0
+  flutter_animate: ^4.3.0
+  google_fonts: ^6.1.0
+  lottie: ^2.7.0
+
+  # Utilities
+  shared_preferences: ^2.2.2
+  intl: ^0.18.1
+  uuid: ^4.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/animations/
+    - assets/images/
