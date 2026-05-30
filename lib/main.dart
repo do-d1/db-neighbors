@@ -401,11 +401,7 @@ class _BpmGaugeState extends State<_BpmGauge> with SingleTickerProviderStateMixi
     ];
 
     return Column(children: [
-      ScaleTransition(
-        scale: Tween(begin: 1.0, end: 1.25).animate(
-            CurvedAnimation(parent: _heart, curve: Curves.easeOut)),
-        child: Icon(Icons.favorite_rounded, size: 80, color: widget.color),
-      ),
+      _MetronomeIcon(bpm: widget.bpm, measuring: widget.measuring, color: widget.color),
       const SizedBox(height: 16),
       Text(widget.measuring ? widget.bpm.toStringAsFixed(0) : '--',
           style: TextStyle(fontSize: 68, fontWeight: FontWeight.bold, color: widget.color)),
@@ -435,9 +431,82 @@ class _BpmGaugeState extends State<_BpmGauge> with SingleTickerProviderStateMixi
         ));
       }).toList()),
       const SizedBox(height: 8),
-      Text('מזהה קצב מוזיקה, צעדים וסביבה',
+      Text('Beats Per Minute — קצב מוזיקה, הפקה, ולייב',
           style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
     ]);
+  }
+}
+
+
+// ─── Metronome Icon ──────────────────────────
+
+class _MetronomeIcon extends StatefulWidget {
+  final double bpm;
+  final bool measuring;
+  final Color color;
+  const _MetronomeIcon({required this.bpm, required this.measuring, required this.color});
+  @override
+  State<_MetronomeIcon> createState() => _MetronomeIconState();
+}
+
+class _MetronomeIconState extends State<_MetronomeIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this);
+    _updateSpeed();
+    _ctrl.repeat(reverse: true);
+  }
+
+  void _updateSpeed() {
+    final bpm = widget.bpm > 0 ? widget.bpm : 120;
+    // חצי beat = חצי מחזור swing
+    _ctrl.duration = Duration(milliseconds: (60000 / bpm / 2).round());
+  }
+
+  @override
+  void didUpdateWidget(_MetronomeIcon old) {
+    super.didUpdateWidget(old);
+    if ((old.bpm - widget.bpm).abs() > 2) _updateSpeed();
+  }
+
+  @override
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (_, __) {
+        final angle = ((_ctrl.value - 0.5) * 0.6); // swing ±0.3 rad
+        return Transform.rotate(
+          angle: widget.measuring ? angle : 0,
+          alignment: Alignment.bottomCenter,
+          child: SizedBox(
+            width: 80, height: 80,
+            child: Stack(alignment: Alignment.center, children: [
+              Icon(Icons.music_note_rounded, size: 72, color: widget.color),
+              // BPM dot indicator
+              if (widget.measuring)
+                Positioned(
+                  top: _ctrl.value < 0.1 || _ctrl.value > 0.9 ? 8 : 100,
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 50),
+                    width: 10, height: 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: widget.color,
+                    ),
+                  ),
+                ),
+            ]),
+          ),
+        );
+      },
+    );
   }
 }
 
